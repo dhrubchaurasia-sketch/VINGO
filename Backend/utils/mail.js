@@ -1,149 +1,135 @@
-import nodemailer from "nodemailer";
+import * as Brevo from "@getbrevo/brevo";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-// Brevo SMTP Configuration
-const smtpPort = Number(process.env.SMTP_PORT || 587);
+// Initialize Brevo Transactional Email API
+const apiInstance = new Brevo.TransactionalEmailsApi();
 
-const transporter = nodemailer.createTransport({
-host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
-port: smtpPort,
-secure: smtpPort === 465,
-
-auth: {
-user: process.env.SMTP_LOGIN,
-pass: process.env.SMTP_PASS,
-},
-
-connectionTimeout: 15000,
-greetingTimeout: 15000,
-socketTimeout: 20000,
-});
-
-// Verify SMTP connection
-transporter.verify((error) => {
-if (error) {
-console.error("SMTP CONNECTION ERROR:", error.message);
-} else {
-console.log("Brevo SMTP Connected Successfully");
+// Configure API key
+if (process.env.BREVO_API_KEY) {
+  apiInstance.setApiKey(
+    Brevo.TransactionalEmailsApiApiKeys.apiKey,
+    process.env.BREVO_API_KEY,
+  );
 }
-});
 
-// Common email sender
+// Common function to send emails using Brevo HTTPS API
 const sendEmail = async ({ to, subject, html }) => {
-if (
-!process.env.SMTP_LOGIN ||
-!process.env.SMTP_PASS ||
-!process.env.SMTP_SENDER
-) {
-throw new Error(
-"Missing SMTP configuration. Check SMTP_LOGIN, SMTP_PASS and SMTP_SENDER."
-);
-}
+  if (!process.env.BREVO_API_KEY) {
+    throw new Error("BREVO_API_KEY is missing from environment variables.");
+  }
 
-try {
-const info = await transporter.sendMail({
-from: `"Vingo" <${process.env.SMTP_SENDER}>`,
-to,
-subject,
-html,
-});
+  if (!process.env.SMTP_SENDER) {
+    throw new Error("SMTP_SENDER is missing from environment variables.");
+  }
 
-```
-console.log("EMAIL SENT SUCCESSFULLY");
-console.log("Message ID:", info.messageId);
-console.log("Accepted:", info.accepted);
-console.log("Rejected:", info.rejected);
+  if (!to) {
+    throw new Error("Recipient email address is required.");
+  }
 
-return info;
-```
+  try {
+    const email = new Brevo.SendSmtpEmail();
 
-} catch (error) {
-console.error("EMAIL SENDING ERROR:", error.message);
-throw error;
-}
+    email.sender = {
+      name: "Vingo",
+      email: process.env.SMTP_SENDER,
+    };
+
+    email.to = [{ email: to }];
+    email.subject = subject;
+    email.htmlContent = html;
+
+    const response = await apiInstance.sendTransacEmail(email);
+
+    console.log("EMAIL REQUEST ACCEPTED BY BREVO");
+    console.log("Brevo Message ID:", response.body?.messageId);
+
+    return response;
+  } catch (error) {
+    console.error("BREVO EMAIL ERROR:", error.response?.body || error.message);
+
+    throw error;
+  }
 };
 
 // Send password reset OTP
 export const sendOtpEmail = async (to, otp) => {
-return sendEmail({
-to,
-subject: "Vingo - Password Reset OTP",
-html: ` <div style="
-     font-family: Arial, sans-serif;
-     max-width: 500px;
-     margin: auto;
-     padding: 24px;
-     border: 1px solid #eeeeee;
-     border-radius: 12px;
-   "> <h2 style="color: #ff4d2d;">Vingo Password Reset</h2>
+  return sendEmail({
+    to,
+    subject: "Vingo - Password Reset OTP",
+    html: `
+      <div style="
+        font-family: Arial, sans-serif;
+        max-width: 500px;
+        margin: auto;
+        padding: 24px;
+        border: 1px solid #eeeeee;
+        border-radius: 12px;
+      ">
+        <h2 style="color: #ff4d2d;">Vingo Password Reset</h2>
 
+        <p>You requested to reset your Vingo account password.</p>
+        <p>Your OTP is:</p>
 
-    <p>You requested to reset your Vingo account password.</p>
-    <p>Your OTP is:</p>
+        <div style="
+          text-align: center;
+          padding: 20px;
+          background: #fff4ee;
+          border-radius: 10px;
+        ">
+          <h1 style="
+            letter-spacing: 8px;
+            color: #ff4d2d;
+          ">${otp}</h1>
+        </div>
 
-    <div style="
-      text-align: center;
-      padding: 20px;
-      background: #fff4ee;
-      border-radius: 10px;
-    ">
-      <h1 style="
-        letter-spacing: 8px;
-        color: #ff4d2d;
-      ">${otp}</h1>
-    </div>
-
-    <p>This OTP expires in 5 minutes.</p>
-    <p>If you did not request a password reset, please ignore this email.</p>
-    <p style="color: #777777;">Thank you for using Vingo!</p>
-  </div>
-`,
-
-
-});
+        <p>This OTP expires in 5 minutes.</p>
+        <p>If you did not request a password reset, please ignore this email.</p>
+        <p style="color: #777777;">Thank you for using Vingo!</p>
+      </div>
+    `,
+  });
 };
 
 // Send delivery OTP
 export const sendDeliveryOtpEmail = async (to, otp) => {
-return sendEmail({
-to,
-subject: "Vingo - Order Delivery OTP",
-html: ` <div style="
-     font-family: Arial, sans-serif;
-     max-width: 500px;
-     margin: auto;
-     padding: 24px;
-     border: 1px solid #eeeeee;
-     border-radius: 12px;
-   "> <h2 style="color: #ff4d2d;">Vingo Order Delivery</h2>
-    <p>Your order is out for delivery!</p>
+  return sendEmail({
+    to,
+    subject: "Vingo - Order Delivery OTP",
+    html: `
+      <div style="
+        font-family: Arial, sans-serif;
+        max-width: 500px;
+        margin: auto;
+        padding: 24px;
+        border: 1px solid #eeeeee;
+        border-radius: 12px;
+      ">
+        <h2 style="color: #ff4d2d;">Vingo Order Delivery</h2>
 
-    <p>
-      Share this OTP with your delivery partner only
-      when your order arrives.
-    </p>
+        <p>Your order is out for delivery!</p>
 
-    <div style="
-      text-align: center;
-      padding: 20px;
-      background: #fff4ee;
-      border-radius: 10px;
-    ">
-      <h1 style="
-        letter-spacing: 8px;
-        color: #ff4d2d;
-      ">${otp}</h1>
-    </div>
+        <p>
+          Share this OTP with your delivery partner only
+          when your order arrives.
+        </p>
 
-    <p>This OTP expires in 10 minutes.</p>
-    <p style="color: #777777;">Thank you for ordering with Vingo!</p>
-  </div>
-`,
+        <div style="
+          text-align: center;
+          padding: 20px;
+          background: #fff4ee;
+          border-radius: 10px;
+        ">
+          <h1 style="
+            letter-spacing: 8px;
+            color: #ff4d2d;
+          ">${otp}</h1>
+        </div>
 
-
-});
+        <p>This OTP expires in 10 minutes.</p>
+        <p style="color: #777777;">Thank you for ordering with Vingo!</p>
+      </div>
+    `,
+  });
 };
-
-export default transporter;
