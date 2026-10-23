@@ -109,10 +109,11 @@ export const signUp = async (req, res) => {
     const token = await genToken(user._id);
 
     res.cookie("token", token, {
-      secure: false,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
 
     return res.status(201).json(user);
@@ -123,32 +124,6 @@ export const signUp = async (req, res) => {
     });
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Sign In
 export const signIn = async (req, res) => {
@@ -164,10 +139,11 @@ export const signIn = async (req, res) => {
     }
     const token = await genToken(user._id);
     res.cookie("token", token, {
-      secure: false,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
     return res.status(200).json(user);
   } catch (error) {
@@ -177,10 +153,20 @@ export const signIn = async (req, res) => {
 // Sign Out
 export const signOut = async (req, res) => {
   try {
-    res.clearCookie("token");
-    return res.status(200).json({ message: "Log Out Successfully" });
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
+
+    return res.status(200).json({
+      message: "Log Out Successfully",
+    });
   } catch (error) {
-    return res.status(500).json(`Sign Out error ${error}`);
+    return res.status(500).json({
+      message: `Sign Out error: ${error.message}`,
+    });
   }
 };
 
@@ -262,10 +248,11 @@ export const googleAuth = async (req, res) => {
     const token = await genToken(user._id);
 
     res.cookie("token", token, {
-      secure: false,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
 
     return res.status(200).json(user);

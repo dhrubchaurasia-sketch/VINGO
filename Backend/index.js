@@ -25,25 +25,28 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://vingo-frontend-lydl.onrender.com",
 ];
-
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    }
+  },
+  credentials: true,
+};
 // Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    ...corsOptions,
     methods: ["GET", "POST"],
-    credentials: true,
   },
 });
 
 // Make io accessible inside controllers through req.app.get("io")
 app.set("io", io);
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
