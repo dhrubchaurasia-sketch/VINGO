@@ -50,7 +50,7 @@ export const createEditShop = async (req, res) => {
       let image = shop.image;
 
       if (req.file) {
-        image = await uploadOnCloudinary(req.file.path);
+        image = await uploadOnCloudinary(req.file.buffer);
       }
 
       shop.name = name;
@@ -72,7 +72,7 @@ export const createEditShop = async (req, res) => {
         });
       }
 
-      const image = await uploadOnCloudinary(req.file.path);
+      const image = await uploadOnCloudinary(req.file.buffer);
 
       shop = await Shop.create({
         name,
@@ -148,7 +148,7 @@ export const addFoodItem = async (req, res) => {
       });
     }
 
-    const image = await uploadOnCloudinary(req.file.path);
+    const image = await uploadOnCloudinary(req.file.buffer);
 
     const item = await Item.create({
       name,
