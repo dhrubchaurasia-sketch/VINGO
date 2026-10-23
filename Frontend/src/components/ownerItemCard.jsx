@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 function OwnerItemCard({ item }) {
     const navigate = useNavigate();
   
-    const serverUrl = "http://localhost:8000";
+    const serverUrl = "https://vingo-backend-ghyw.onrender.com";
     // const handleDelete = async () => {
     //     try {
     //       const response = await fetch(`${serverUrl}/api/items/delete-item/${item._id}`, {

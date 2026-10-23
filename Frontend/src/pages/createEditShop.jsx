@@ -48,7 +48,7 @@ function CreateEditShop() {
     text: "",
   });
 
-  const serverUrl = "http://localhost:8000";
+  const serverUrl = "https://vingo-backend-ghyw.onrender.com";
 
   // Handle restaurant image
   const handleImage = (e) => {

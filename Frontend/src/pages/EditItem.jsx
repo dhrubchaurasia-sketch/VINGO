@@ -39,7 +39,7 @@ function EditItem() {
     "Others",
   ];
 
-  const serverUrl = "http://localhost:8000";
+  const serverUrl = "https://vingo-backend-ghyw.onrender.com";
 
   // Get selected item from shop data
   useEffect(() => {

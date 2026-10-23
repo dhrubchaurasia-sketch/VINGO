@@ -48,7 +48,7 @@ function MapUpdater({ position }) {
 }
 
 export default function LiveTrackingMap({
-  serverUrl = "http://localhost:8000",
+  serverUrl = "https://vingo-backend-ghyw.onrender.com",
   assignmentId,
   customerLocation,
   initialDeliveryBoyLocation = null,

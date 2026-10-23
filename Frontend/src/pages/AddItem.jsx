@@ -32,7 +32,7 @@ function AddItem() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const foodTypes = ["veg", "non veg"];
   const [selectedFoodType, setSelectedFoodType] = useState("veg");
-  const serverUrl = "http://localhost:8000";
+  const serverUrl = "https://vingo-backend-ghyw.onrender.com";
 
   const handleImage = (e) => {
     const file = e.target.files[0];
