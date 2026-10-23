@@ -6,7 +6,7 @@ export const addItem = async (req, res) => {
     const { name, price, category, foodType } = req.body;
     let image;
     if(req.file){
-        image = await uploadOnCloudinary(req.file.path);
+        image = await uploadOnCloudinary(req.file.buffer);
     }
     const shop =await Shop.findOne({owner:req.user._id});
     if(!shop){
@@ -30,7 +30,7 @@ export const editItem = async (req, res) => {
         const { name, price, category, foodType } = req.body;
         let image;
         if(req.file){
-            image = await uploadOnCloudinary(req.file.path);
+            image = await uploadOnCloudinary(req.file.buffer);
         }
         const item = await Item.findByIdAndUpdate(itemId,{
             name,category,foodType,price,image
