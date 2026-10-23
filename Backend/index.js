@@ -40,7 +40,7 @@ app.set("io", io);
 
 app.use(
   cors({
-    origin: "allowedOrigins",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
