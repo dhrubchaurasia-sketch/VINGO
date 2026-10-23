@@ -1,121 +1,149 @@
-// import nodemailer from "nodemailer";
-// import dotenv from "dotenv";
-// dotenv.config();
-
-// console.log("EMAIL:", JSON.stringify(process.env.EMAIL));
-// console.log("PASS length:", process.env.PASS?.length, JSON.stringify(process.env.PASS));
-// const transporter = nodemailer.createTransport({
-//   service: "gmail",
-//   port: 465,
-//   secure: true,
-//   auth: {
-//     user: process.env.EMAIL,
-//     pass: process.env.PASS,
-//   },
-// });
-
-
-// transporter.verify((err, success) => {
-//     if (err) {
-//         console.log("SMTP ERROR:", err);
-//     } else {
-//         console.log("SMTP Connected");
-//     }
-// });
-
-// export const sendOtpEmail = async (to, otp) => {
-//     await transporter.sendMail({
-//       from: process.env.EMAIL,
-//       to,
-//       subject: "Reset your Password",
-//       html:`<p>Your OTP for password reset is <b>${otp}</b>. It expires in 5 minutes.</p> `,
-      
-//     });
-//   };
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
 dotenv.config();
 
+// Brevo SMTP Configuration
+const smtpPort = Number(process.env.SMTP_PORT || 587);
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_LOGIN,
-    pass: process.env.SMTP_PASS,
-  },
+host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
+port: smtpPort,
+secure: smtpPort === 465,
+
+auth: {
+user: process.env.SMTP_LOGIN,
+pass: process.env.SMTP_PASS,
+},
+
+connectionTimeout: 15000,
+greetingTimeout: 15000,
+socketTimeout: 20000,
 });
 
-
-transporter.verify((error, success) => {
-  if (error) {
-    console.log("SMTP ERROR:", error);
-  } else {
-    console.log("SMTP Connected Successfully");
-  }
+// Verify SMTP connection
+transporter.verify((error) => {
+if (error) {
+console.error("SMTP CONNECTION ERROR:", error.message);
+} else {
+console.log("Brevo SMTP Connected Successfully");
+}
 });
 
+// Common email sender
+const sendEmail = async ({ to, subject, html }) => {
+if (
+!process.env.SMTP_LOGIN ||
+!process.env.SMTP_PASS ||
+!process.env.SMTP_SENDER
+) {
+throw new Error(
+"Missing SMTP configuration. Check SMTP_LOGIN, SMTP_PASS and SMTP_SENDER."
+);
+}
 
-// export const sendOtpEmail = async (to, otp) => {
-//   const info = await transporter.sendMail({
-//     from: process.env.SMTP_SENDER,
-//     to: to,
-//     subject: "Reset your Password OTP",
-//     html: `
-//       <h2>Password Reset</h2>
-//       <p>Your OTP is:</p>
-//       <h1>${otp}</h1>
-//       <p>This OTP expires in 5 minutes.</p>
-//     `,
-//   });
-//   console.log("Mail Info:",info);
-// };
+try {
+const info = await transporter.sendMail({
+from: `"Vingo" <${process.env.SMTP_SENDER}>`,
+to,
+subject,
+html,
+});
 
+```
+console.log("EMAIL SENT SUCCESSFULLY");
+console.log("Message ID:", info.messageId);
+console.log("Accepted:", info.accepted);
+console.log("Rejected:", info.rejected);
+
+return info;
+```
+
+} catch (error) {
+console.error("EMAIL SENDING ERROR:", error.message);
+throw error;
+}
+};
+
+// Send password reset OTP
 export const sendOtpEmail = async (to, otp) => {
-  try {
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_SENDER,
-      to,
-      subject: "Reset Password OTP",
-      html: `<h1>${otp}</h1>`,
-    });
+return sendEmail({
+to,
+subject: "Vingo - Password Reset OTP",
+html: ` <div style="
+     font-family: Arial, sans-serif;
+     max-width: 500px;
+     margin: auto;
+     padding: 24px;
+     border: 1px solid #eeeeee;
+     border-radius: 12px;
+   "> <h2 style="color: #ff4d2d;">Vingo Password Reset</h2>
 
-    console.log("Message ID:", info.messageId);
-    console.log("Accepted:", info.accepted);
-    console.log("Rejected:", info.rejected);
-    console.log(info);
-  } catch (err) {
-    console.error("MAIL ERROR:", err);
-  }
+
+    <p>You requested to reset your Vingo account password.</p>
+    <p>Your OTP is:</p>
+
+    <div style="
+      text-align: center;
+      padding: 20px;
+      background: #fff4ee;
+      border-radius: 10px;
+    ">
+      <h1 style="
+        letter-spacing: 8px;
+        color: #ff4d2d;
+      ">${otp}</h1>
+    </div>
+
+    <p>This OTP expires in 5 minutes.</p>
+    <p>If you did not request a password reset, please ignore this email.</p>
+    <p style="color: #777777;">Thank you for using Vingo!</p>
+  </div>
+`,
+
+
+});
 };
-// Send Delivery OTP Email
+
+// Send delivery OTP
 export const sendDeliveryOtpEmail = async (to, otp) => {
-  const info = await transporter.sendMail({
-    from: process.env.SMTP_SENDER,
-    to,
-    subject: "Your Vingo Order Delivery OTP",
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 12px;">
-        <h2 style="color: #ff4d2d;">Vingo - Order Delivery</h2>
+return sendEmail({
+to,
+subject: "Vingo - Order Delivery OTP",
+html: ` <div style="
+     font-family: Arial, sans-serif;
+     max-width: 500px;
+     margin: auto;
+     padding: 24px;
+     border: 1px solid #eeeeee;
+     border-radius: 12px;
+   "> <h2 style="color: #ff4d2d;">Vingo Order Delivery</h2>
+    <p>Your order is out for delivery!</p>
 
-        <p>Your order is out for delivery!</p>
+    <p>
+      Share this OTP with your delivery partner only
+      when your order arrives.
+    </p>
 
-        <p>Please share the following OTP with your delivery partner
-        only when your order arrives.</p>
+    <div style="
+      text-align: center;
+      padding: 20px;
+      background: #fff4ee;
+      border-radius: 10px;
+    ">
+      <h1 style="
+        letter-spacing: 8px;
+        color: #ff4d2d;
+      ">${otp}</h1>
+    </div>
 
-        <div style="text-align: center; padding: 20px; background: #fff4ee; border-radius: 10px;">
-          <h1 style="letter-spacing: 8px; color: #ff4d2d;">${otp}</h1>
-        </div>
+    <p>This OTP expires in 10 minutes.</p>
+    <p style="color: #777777;">Thank you for ordering with Vingo!</p>
+  </div>
+`,
 
-        <p>This OTP expires in 10 minutes.</p>
 
-        <p style="color: #777;">Thank you for ordering with Vingo!</p>
-      </div>
-    `,
-  });
-
-  console.log("Delivery OTP email sent:", info.messageId);
-
-  return info;
+});
 };
+
+export default transporter;
