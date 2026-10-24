@@ -55,7 +55,8 @@ function App() {
       <Route path="/signup"  element={!userData ? <SignUp /> : <Navigate to="/" />}/>
       <Route path="/signin" element={!userData ? <SignIn /> : <Navigate to="/" />} />
       <Route  path="/forgot-password" element={!userData ? <ForgotPassword /> : <Navigate to="/" />}/>
-      <Route path="/" element={<Home />} />
+      {/* <Route path="/" element={<Home />} /> */}
+      <Route path="/" element={!userData ? <Navigate to="/signup" replace /> : <Home />}/>
       <Route path="/create-edit-shop" element={<CreateEditShop />} />
       <Route path="/add-food-items" element={<AddItem />} />
       <Route path="/cart" element={<CartPage />} />
