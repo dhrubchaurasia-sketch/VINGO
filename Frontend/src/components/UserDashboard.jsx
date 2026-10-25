@@ -183,10 +183,7 @@ function UserDashboard() {
         {filteredItems.length > 0 ? (
           <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
             {filteredItems.map((item, index) => {
-              // Debug: verify actual item and shop IDs
-              // Remove this console after checking the output.
-              // console.log("FOOD ITEM DATA:", item);
-              // console.log("SHOP VALUE:", item.shop);
+             
 
               return (
                 <FoodCard

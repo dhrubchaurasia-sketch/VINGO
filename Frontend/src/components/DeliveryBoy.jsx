@@ -269,17 +269,7 @@ function DeliveryBoy() {
 
   return (
     <div className="min-h-screen bg-[#fffaf7] text-gray-800">
-      {/* Navbar */}
-      {/* <nav className="ml-320">
-        <button
-          onClick={fetchAvailableOrders}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-orange-100 bg-orange-50 text-orange-600 font-semibold hover:bg-orange-100 transition disabled:opacity-50"
-        >
-          <FaRotate className={loading ? "animate-spin" : ""} />
-          <span className="hidden sm:inline">Refresh Orders</span>
-        </button>
-      </nav> */}
+  
 
       {/* Main */}
       <main className="max-w-4xl mx-auto px-5 py-8 sm:py-12">

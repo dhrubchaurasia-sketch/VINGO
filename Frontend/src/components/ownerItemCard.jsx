@@ -6,24 +6,7 @@ function OwnerItemCard({ item }) {
     const navigate = useNavigate();
   
     const serverUrl = "https://vingo-backend-ghyw.onrender.com";
-    // const handleDelete = async () => {
-    //     try {
-    //       const response = await fetch(`${serverUrl}/api/items/delete-item/${item._id}`, {
-    //         method: "DELETE",
-    //         headers: {
-    //           "Authorization": `Bearer ${localStorage.getItem("token")}`
-    //         }
-    //       });
-    //       const data = await response.json();
-    //       if (response.ok) {
-    //         window.location.reload();
-    //       } else {
-    //         console.error("Error deleting item:", data.message);
-    //       }
-    //     } catch (error) {
-    //       console.error("Error deleting item:", error.message);
-    //     }
-    //   };
+  
     const handleDelete = async () => {
   try {
     const response = await fetch(

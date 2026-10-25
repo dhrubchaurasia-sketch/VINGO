@@ -9,7 +9,7 @@ import DeliveryAssignment from "../models/deliveryAssignment.model.js";
 export const placeOrder = async (req, res) => {
   try {
     const { cartItems, paymentMethod, deliveryAddress } = req.body;
-    // console.log("CART ITEMS:", JSON.stringify(cartItems, null, 2));
+   
     if (!Array.isArray(cartItems) || cartItems.length == 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
