@@ -22,7 +22,9 @@ import EditItem from "./pages/EditItem";
 import CartPage from "./pages/CartPage";
 import Checkout from "./pages/Checkout";
 import useUpdateLocation from "./hooks/useUpdateLocation";
-export const serverUrl = "https://vingo-backend-ghyw.onrender.com";
+// export const serverUrl = "https://vingo-backend-ghyw.onrender.com";
+export const serverUrl = import.meta.env.VITE_SERVER_URL;
+
 function App() {
   const { userData } = useSelector((state) => state.user);
   useGetCurrentUser();
