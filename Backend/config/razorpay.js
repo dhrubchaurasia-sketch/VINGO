@@ -5,4 +5,10 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
+
+console.log("RAZORPAY ENV CHECK:", {
+    keyExists: !!process.env.RAZORPAY_KEY_ID,
+    secretExists: !!process.env.RAZORPAY_KEY_SECRET,
+    keyPrefix: process.env.RAZORPAY_KEY_ID?.slice(0, 9)
+});
 export default razorpay;
