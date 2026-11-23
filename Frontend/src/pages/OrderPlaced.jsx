@@ -1,9 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 
 function OrderPlaced() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      navigate("/home", { replace: true });
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#fff9f6] px-4">
@@ -22,14 +33,13 @@ function OrderPlaced() {
         {/* Message */}
         <p className="text-black text-sm sm:text-base mb-7 leading-relaxed">
           Thank you for your purchase. Your food is being prepared.
-        
         </p>
 
         {/* Back to Home */}
         <button
           type="button"
-          onClick={() => navigate("/")}
-          className="bg-[#ff4d2d] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#e64326] transition-colors"
+          onClick={() => navigate("/home", { replace: true })}
+          className="bg-[#ff4d2d] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#e64326] transition-colors cursor-pointer"
         >
           Back to Home
         </button>

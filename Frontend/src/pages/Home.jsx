@@ -16,7 +16,7 @@ function Home() {
   const searchQuery = searchParams.get("search") || "";
 
   return (
-    <div className="w-full min-h-screen pt-[74px] flex flex-col items-center bg-[#fff9f6]">
+    <div className="w-full min-h-screen pt-18.5 flex flex-col items-center bg-[#fff9f6]">
       <Nav />
       {userData?.role === "user" && (
         <UserDashboard dietFilter={dietFilter} searchQuery={searchQuery} />
