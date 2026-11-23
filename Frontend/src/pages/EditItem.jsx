@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,6 +5,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaUtensils } from "react-icons/fa";
 import axios from "axios";
 import { setMyShopData } from "../redux/ownerSlice";
+import { serverUrl } from "../App";
 
 function EditItem() {
   const navigate = useNavigate();
@@ -39,8 +39,6 @@ function EditItem() {
     "Others",
   ];
 
-  const serverUrl = "https://vingo-backend-ghyw.onrender.com";
-
   // Get selected item from shop data
   useEffect(() => {
     if (myShopData?.items?.length > 0 && id) {
@@ -53,11 +51,7 @@ function EditItem() {
         setPrice(itemToEdit.price);
         setSelectedCategory(itemToEdit.category);
         setSelectedFoodType(itemToEdit.foodType);
-
-       
         setFrontendImage(itemToEdit.image);
-
-       
         setBackendImage(null);
       }
     }
@@ -87,7 +81,6 @@ function EditItem() {
       formData.append("category", selectedCategory);
       formData.append("foodType", selectedFoodType);
 
-      // Only send image if user selected a new one
       if (backendImage) {
         formData.append("image", backendImage);
       }
@@ -100,24 +93,21 @@ function EditItem() {
         }
       );
 
-      console.log("EDIT ITEM RESPONSE:", result.data);
+      const updatedItem = result.data.item;
 
-    //   dispatch(setMyShopData(result.data));
-    const updatedItem = result.data.item;
+      const updatedShopData = {
+        ...myShopData,
+        items: myShopData.items.map((item) =>
+          item._id === updatedItem._id ? updatedItem : item
+        ),
+      };
 
-const updatedShopData = {
-  ...myShopData,
-  items: myShopData.items.map((item) =>
-    item._id === updatedItem._id ? updatedItem : item
-  ),
-};
+      dispatch(setMyShopData(updatedShopData));
 
-dispatch(setMyShopData(updatedShopData));
-
-      navigate("/");
+      navigate("/home");
     } catch (error) {
       console.error("EDIT FOOD ITEM ERROR:", error);
-      console.error("RESPONSE:", error.response?.data);
+      alert(error.response?.data?.message || "Failed to update item");
     } finally {
       setLoading(false);
     }
@@ -125,7 +115,6 @@ dispatch(setMyShopData(updatedShopData));
 
   return (
     <div className="flex justify-center items-center w-full min-h-screen p-6 bg-linear-to-br from-orange-50 to-white relative">
-
       {/* Back button */}
       <div
         className="absolute top-4 left-4 text-3xl text-[#ff4d2d] cursor-pointer"
@@ -135,10 +124,8 @@ dispatch(setMyShopData(updatedShopData));
       </div>
 
       <div className="max-w-lg w-full bg-white shadow-xl rounded-2xl p-8 border border-orange-100">
-
         {/* Header */}
         <div className="flex flex-col items-center mb-6">
-
           <div className="bg-orange-100 p-4 rounded-full mb-4">
             <FaUtensils className="text-[#ff4d2d] w-16 h-16" />
           </div>
@@ -146,11 +133,9 @@ dispatch(setMyShopData(updatedShopData));
           <div className="text-2xl font-extrabold text-gray-800">
             Edit Food Item
           </div>
-
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-
           {/* Food Name */}
           <div>
             <label
@@ -273,7 +258,6 @@ dispatch(setMyShopData(updatedShopData));
           >
             {loading ? "Updating..." : "Update"}
           </button>
-
         </form>
       </div>
     </div>
