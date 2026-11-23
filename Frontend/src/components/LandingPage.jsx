@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 import {
   FaArrowRight,
   FaStar,
@@ -97,12 +99,6 @@ const dishes = [
 
 const features = [
   {
-    icon: <FaMotorcycle />,
-    title: "Fast delivery",
-    description:
-      "Riders pick up the moment your food is ready, so it reaches you hot.",
-  },
-  {
     icon: <FaUtensils />,
     title: "Fresh, quality food",
     description:
@@ -113,6 +109,12 @@ const features = [
     title: "Safe payments",
     description:
       "Pay with UPI, cards or wallets through a secure checkout. No card details stored on our side.",
+  },
+  {
+    icon: <FaMotorcycle />,
+    title: "Fast delivery",
+    description:
+      "Riders pick up the moment your food is ready, so it reaches you hot.",
   },
 ];
 
@@ -134,17 +136,14 @@ const steps = [
 const reviews = [
   {
     name: "Aarav Patel",
-    place: "Vadodara",
     text: "Biryani arrived hot and in under 30 minutes. The live tracking is actually accurate.",
   },
   {
     name: "Neha Sharma",
-    place: "Ahmedabad",
     text: "Clean app, no confusing menus. Ordered for the whole hostel floor without a single issue.",
   },
   {
     name: "Rohan Mehta",
-    place: "Surat",
     text: "Payment was smooth and the refund for a missing item came back the same day.",
   },
 ];
@@ -156,19 +155,7 @@ const trackerStates = [
   { label: "Arriving at your door", eta: "2 min", progress: 100 },
 ];
 
-const marqueeItems = [
-  "Pizza",
-  "Burgers",
-  "Biryani",
-  "Pasta",
-  "Desserts",
-  "Cold coffee",
-  "Momos",
-  "Rolls",
-];
-
 const navLinks = [
-  { href: "#menu", label: "Menu" },
   { href: "#how", label: "How it works" },
   { href: "#why", label: "Why VINGO" },
   { href: "#reviews", label: "Reviews" },
@@ -184,8 +171,9 @@ function OrderTracker() {
   useEffect(() => {
     const id = setInterval(
       () => setIndex((i) => (i + 1) % trackerStates.length),
-      2600
+      2600,
     );
+
     return () => clearInterval(id);
   }, []);
 
@@ -203,6 +191,7 @@ function OrderTracker() {
       <p className="font-display text-lg font-bold mt-3 leading-tight">
         {state.label}
       </p>
+
       <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
         <FaClock className="text-xs" /> Arrives in {state.eta}
       </p>
@@ -269,7 +258,7 @@ function DishCard({ dish }) {
           <Link
             to="/signin"
             aria-label={`Order ${dish.name}`}
-            className="flex items-center gap-2 bg-[#ff4d2d] text-white pl-4 pr-3.5 py-2.5 rounded-full text-sm font-bold hover:bg-[#e03a1b] transition-colors  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff4d2d]"
+            className="flex items-center gap-2 bg-[#ff4d2d] text-white pl-4 pr-3.5 py-2.5 rounded-full text-sm font-bold hover:bg-[#e03a1b] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff4d2d]"
           >
             Add <FaPlus className="text-xs" />
           </Link>
@@ -284,14 +273,20 @@ function DishCard({ dish }) {
 /* ------------------------------------------------------------------ */
 
 function LandingPage() {
+  const currentCity = useSelector((state) => state.user.currentCity);
+  const [activeFeature, setActiveFeature] = useState(0);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
+
     onScroll();
+
     window.addEventListener("scroll", onScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -313,23 +308,26 @@ function LandingPage() {
           from { opacity: 0; transform: translateY(24px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+
         @keyframes vingo-pop {
           from { opacity: 0; transform: scale(.9) translateY(10px); }
           to   { opacity: 1; transform: scale(1) translateY(0); }
         }
+
         @keyframes vingo-marquee {
           from { transform: translateX(0); }
           to   { transform: translateX(-50%); }
         }
+
         @keyframes vingo-bob {
           0%, 100% { transform: translateY(0); }
           50%      { transform: translateY(-8px); }
         }
 
-        .vingo .rise   { opacity: 0; animation: vingo-rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
-        .vingo .pop    { opacity: 0; animation: vingo-pop .6s cubic-bezier(.2,.7,.2,1) forwards; }
+        .vingo .rise { opacity: 0; animation: vingo-rise .7s cubic-bezier(.2,.7,.2,1) forwards; }
+        .vingo .pop { opacity: 0; animation: vingo-pop .6s cubic-bezier(.2,.7,.2,1) forwards; }
         .vingo .marquee-track { animation: vingo-marquee 28s linear infinite; }
-        .vingo .bob    { animation: vingo-bob 5s ease-in-out infinite; }
+        .vingo .bob { animation: vingo-bob 5s ease-in-out infinite; }
 
         @media (prefers-reduced-motion: reduce) {
           .vingo .rise, .vingo .pop { animation: none; opacity: 1; }
@@ -337,7 +335,7 @@ function LandingPage() {
         }
       `}</style>
 
-      {/* ============================ NAVBAR ============================ */}
+      {/* NAVBAR */}
 
       <header
         className={`sticky top-0 z-50 transition-all ${
@@ -347,8 +345,8 @@ function LandingPage() {
         }`}
       >
         <nav className="max-w-7xl mx-auto px-5 md:px-10 h-18 flex items-center justify-between">
-          <Link to="/" className="font-display text-3xl font-extrabold">
-            VINGO<span className="text-[#ff4d2d]">.</span>
+          <Link to="/" className="font-display text-3xl text-[#ff4d2d] font-extrabold">
+            VINGO
           </Link>
 
           <div className="hidden md:flex items-center gap-9 text-sm font-semibold text-gray-600">
@@ -402,6 +400,7 @@ function LandingPage() {
                 {l.label}
               </a>
             ))}
+
             <Link
               to="/signin"
               className="py-3 font-semibold text-[#ff4d2d]"
@@ -413,7 +412,7 @@ function LandingPage() {
         )}
       </header>
 
-      {/* ============================= HERO ============================= */}
+      {/* HERO */}
 
       <section className="max-w-7xl mx-auto px-5 md:px-10 pt-10 pb-20 md:pt-16 md:pb-28 grid lg:grid-cols-[1.05fr_1fr] items-center gap-14">
         <div>
@@ -424,7 +423,10 @@ function LandingPage() {
             <span className="w-7 h-7 rounded-full bg-[#ff4d2d] text-white flex items-center justify-center text-xs">
               <FaMapMarkerAlt />
             </span>
-            Now delivering across Gujarat
+
+            {currentCity
+              ? `Delivering in ${currentCity}`
+              : "Detecting your location..."}
           </p>
 
           <h1
@@ -452,13 +454,6 @@ function LandingPage() {
             >
               Order now <FaArrowRight />
             </Link>
-
-            <a
-              href="#menu"
-              className="px-8 py-4 rounded-full font-bold border-2 border-[#1b1210]/10 hover:border-[#ff4d2d] hover:text-[#ff4d2d] transition-colors"
-            >
-              See the menu
-            </a>
           </div>
 
           <div
@@ -480,127 +475,23 @@ function LandingPage() {
 
         {/* HERO VISUAL */}
 
-        <div className="relative flex justify-center lg:justify-end">
-          <div className="absolute inset-0 m-auto w-[85%] aspect-square rounded-full bg-[#ffc93c]/50 blur-3xl" />
-
+        <div className="relative flex justify-center lg:justify-end w-full">
           <div
-            className="pop relative w-full max-w-130 aspect-square rounded-[48px] rounded-br-[160px] overflow-hidden bg-orange-100 shadow-2xl shadow-orange-900/15"
+            className="pop relative w-full max-w-220 aspect-4/3  -translate-y-6 rounded-[48px] rounded-br-[150px] overflow-hidden bg-orange-100 shadow-2xl shadow-orange-900/15"
             style={{ animationDelay: "250ms" }}
           >
             <img
-              src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1000"
-              alt="Bowl of freshly cooked food"
+              src="/vingo-logo_1.webp"
+              alt="Delicious restaurant food spread"
               className="w-full h-full object-cover"
             />
           </div>
 
-          <div
-            className="pop absolute -bottom-6 left-0 sm:-left-6"
-            style={{ animationDelay: "700ms" }}
-          >
-            <div className="bob">
-              <OrderTracker />
-            </div>
-          </div>
-
-          <div
-            className="pop absolute top-6 right-0 sm:-right-4 bg-white rounded-2xl px-4 py-3 shadow-xl shadow-orange-900/10 flex items-center gap-3"
-            style={{ animationDelay: "900ms" }}
-          >
-            <span className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-xl">
-              🍔
-            </span>
-            <div>
-              <p className="font-bold text-sm leading-tight">Fresh and tasty</p>
-              <p className="text-xs text-gray-500">Cooked after you order</p>
-            </div>
-          </div>
+          
         </div>
       </section>
 
-      {/* =========================== MARQUEE =========================== */}
-
-      <div
-        className="bg-[#ff4d2d] text-white py-4 overflow-hidden"
-        aria-hidden="true"
-      >
-        <div className="marquee-track flex w-max">
-          {[...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems].map(
-            (item, i) => (
-              <span
-                key={i}
-                className="font-display text-2xl font-bold px-6 flex items-center gap-12"
-              >
-                {item}
-                <span className="text-white/50">✦</span>
-              </span>
-            )
-          )}
-        </div>
-      </div>
-
-      {/* ============================ MENU ============================= */}
-
-      <section id="menu" className="py-20 md:py-28 px-5 md:px-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <h2 className="font-display text-4xl md:text-5xl font-extrabold leading-tight">
-                What are you craving today?
-              </h2>
-              <p className="text-gray-600 mt-3 text-lg">
-                Pick a category and see what people near you are ordering.
-              </p>
-            </div>
-
-            <Link
-              to="/signin"
-              className="flex items-center gap-2 font-bold text-[#ff4d2d] hover:gap-4 transition-all"
-            >
-              View full menu <FaArrowRight />
-            </Link>
-          </div>
-
-          {/* CATEGORY CHIPS */}
-
-          <div
-            className="flex gap-3 overflow-x-auto pb-2 mt-10 -mx-5 px-5 md:mx-0 md:px-0"
-            role="tablist"
-            aria-label="Food categories"
-          >
-            {categories.map((c) => {
-              const active = c.name === activeCategory;
-              return (
-                <button
-                  key={c.name}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setActiveCategory(c.name)}
-                  className={`shrink-0 flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm border-2 transition-colors  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff4d2d] ${
-                    active
-                      ? "bg-[#1b1210] border-[#1b1210] text-white"
-                      : "bg-white border-orange-100 text-gray-700 hover:border-[#ff4d2d]"
-                  }`}
-                >
-                  <span className="text-lg">{c.emoji}</span>
-                  {c.name}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* DISH GRID */}
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7 mt-10">
-            {visibleDishes.map((dish) => (
-              <DishCard key={dish.name} dish={dish} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ========================== HOW IT WORKS ======================== */}
+      {/* HOW IT WORKS */}
 
       <section id="how" className="py-20 md:py-28 px-5 md:px-10 bg-white">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-[0.8fr_1.2fr] gap-14 items-start">
@@ -608,6 +499,7 @@ function LandingPage() {
             <h2 className="font-display text-4xl md:text-5xl font-extrabold leading-tight">
               From craving to doorstep in three steps.
             </h2>
+
             <p className="text-gray-600 mt-4 text-lg max-w-md">
               No phone calls, no waiting on hold. Just pick, pay and track.
             </p>
@@ -629,6 +521,7 @@ function LandingPage() {
                 <span className="font-display text-5xl font-extrabold text-[#ff4d2d] leading-none">
                   {i + 1}
                 </span>
+
                 <div>
                   <h3 className="font-display text-2xl font-bold">
                     {step.title}
@@ -650,22 +543,14 @@ function LandingPage() {
           </h2>
 
           <div className="grid md:grid-cols-3 gap-7 mt-12">
-            {features.map((f, i) => (
+            {features.map((f) => (
               <div
                 key={f.title}
-                className={`rounded-3xl p-8 ${
-                  i === 0
-                    ? "bg-[#1b1210] text-white"
-                    : "bg-white border border-orange-100"
-                }`}
+                className="bg-white border border-orange-100 rounded-3xl p-8
+          transition-all duration-300 ease-in-out
+          hover:-translate-y-3 hover:scale-[1.03] hover:shadow-2xl hover:border-[#ff4d2d]/40"
               >
-                <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${
-                    i === 0
-                      ? "bg-[#ff4d2d] text-white"
-                      : "bg-orange-100 text-[#ff4d2d]"
-                  }`}
-                >
+                <div className="w-14 h-14 rounded-2xl bg-orange-100 text-[#ff4d2d] flex items-center justify-center text-2xl">
                   {f.icon}
                 </div>
 
@@ -673,20 +558,14 @@ function LandingPage() {
                   {f.title}
                 </h3>
 
-                <p
-                  className={`mt-3 leading-7 ${
-                    i === 0 ? "text-white/70" : "text-gray-600"
-                  }`}
-                >
-                  {f.description}
-                </p>
+                <p className="mt-3 leading-7 text-gray-600">{f.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* =========================== REVIEWS =========================== */}
+      {/* REVIEWS */}
 
       <section id="reviews" className="py-20 md:py-28 px-5 md:px-10 bg-white">
         <div className="max-w-7xl mx-auto">
@@ -710,14 +589,8 @@ function LandingPage() {
                   <span className="w-11 h-11 rounded-full bg-[#ffc93c] flex items-center justify-center font-display font-bold">
                     {r.name.charAt(0)}
                   </span>
-                  <span>
-                    <span className="block font-bold leading-tight">
-                      {r.name}
-                    </span>
-                    <span className="block text-sm text-gray-500">
-                      {r.place}
-                    </span>
-                  </span>
+
+                  <span className="font-bold leading-tight">{r.name}</span>
                 </figcaption>
               </figure>
             ))}
@@ -725,7 +598,7 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ============================= CTA ============================= */}
+      {/* CTA */}
 
       <section className="px-5 md:px-10 py-20 md:py-28">
         <div className="max-w-7xl mx-auto bg-[#ff4d2d] rounded-[40px] p-10 md:p-16 relative overflow-hidden">
@@ -767,14 +640,14 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* ============================ FOOTER =========================== */}
+      {/* FOOTER */}
 
       <footer className="bg-[#1b1210] text-white px-5 md:px-10 pt-16 pb-7">
         <div className="max-w-7xl mx-auto">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-12 pb-14">
             <div>
-              <h2 className="font-display text-3xl font-extrabold">
-                VINGO<span className="text-[#ff4d2d]">.</span>
+              <h2 className="font-display text-3xl font-extrabold text-[#FFF9F6]">
+                VINGO
               </h2>
 
               <p className="text-white/60 text-sm leading-7 mt-5 max-w-xs">
@@ -804,6 +677,7 @@ function LandingPage() {
               <h3 className="font-display font-bold text-lg mb-6">
                 Quick links
               </h3>
+
               <div className="flex flex-col gap-4 text-white/60 text-sm">
                 {navLinks.map((l) => (
                   <a
@@ -819,11 +693,19 @@ function LandingPage() {
 
             <div>
               <h3 className="font-display font-bold text-lg mb-6">Account</h3>
+
               <div className="flex flex-col gap-4 text-white/60 text-sm">
-                <Link to="/signin" className="hover:text-[#ff4d2d] transition-colors">
+                <Link
+                  to="/signin"
+                  className="hover:text-[#ff4d2d] transition-colors"
+                >
                   Log in
                 </Link>
-                <Link to="/signup" className="hover:text-[#ff4d2d] transition-colors">
+
+                <Link
+                  to="/signup"
+                  className="hover:text-[#ff4d2d] transition-colors"
+                >
                   Create account
                 </Link>
               </div>
@@ -833,6 +715,7 @@ function LandingPage() {
               <h3 className="font-display font-bold text-lg mb-6">
                 Contact us
               </h3>
+
               <div className="flex flex-col gap-4 text-white/60 text-sm">
                 <p>India</p>
                 <p>support@vingo.com</p>
