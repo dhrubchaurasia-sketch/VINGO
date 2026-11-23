@@ -50,9 +50,9 @@ function SignUp() {
   };
 
   const handleGoogleAuth = async () => {
-    if (!mobile) {
-      return setErr("Mobile number is required");
-    }
+    // if (!mobile) {
+    //   return setErr("Mobile number is required");
+    // }
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     try {

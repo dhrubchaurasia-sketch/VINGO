@@ -51,11 +51,11 @@ export const signUp = async (req, res) => {
       });
     }
 
-    if (!/^[0-9]{10}$/.test(mobile)) {
-      return res.status(400).json({
-        message: "Mobile no must be at least 10 digits.",
-      });
-    }
+    // if (!/^[0-9]{10}$/.test(mobile)) {
+    //   return res.status(400).json({
+    //     message: "Mobile no must be at least 10 digits.",
+    //   });
+    // }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
