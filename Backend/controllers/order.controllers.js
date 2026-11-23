@@ -6,6 +6,7 @@ import Item from "../models/item.model.js";
 import User from "../models/user.model.js";
 import { sendDeliveryOtpEmail } from "../utils/mail.js";
 import DeliveryAssignment from "../models/deliveryAssignment.model.js";
+
 export const placeOrder = async (req, res) => {
   try {
     const { cartItems, paymentMethod, deliveryAddress } = req.body;
@@ -288,18 +289,26 @@ export const updateOrderStatus = async (req, res) => {
       }
 
       // ----------------------------------
-      // STEP 5: Send OTP email
+      // STEP 5: Send OTP email (Non-blocking on email failure)
       // ----------------------------------
 
-      await sendDeliveryOtpEmail(
-        customer.email,
-        otp
-      );
+      try {
+        await sendDeliveryOtpEmail(
+          customer.email,
+          otp
+        );
 
-      console.log(
-        "Delivery OTP email sent to customer:",
-        customer.email
-      );
+        console.log(
+          "Delivery OTP email sent to customer:",
+          customer.email
+        );
+      } catch (emailError) {
+        console.error(
+          "DELIVERY OTP EMAIL FAILED (Proceeding without rollback):",
+          emailError.message
+        );
+        console.log("TEST OTP FOR CUSTOMER:", otp);
+      }
 
       const deliveryBoyPayload = availableBoys.map(
         (boy) => ({
@@ -327,7 +336,7 @@ export const updateOrderStatus = async (req, res) => {
 
       return res.status(200).json({
         message:
-          "Order is out for delivery. OTP sent to the customer's email.",
+          "Order is out for delivery.",
         shopOrder: updatedShopOrder,
         status: updatedShopOrder.status,
         assignedDeliveryBoy:
