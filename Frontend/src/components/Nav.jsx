@@ -1,20 +1,70 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import {  FaPlus } from "react-icons/fa6";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { FaPlus } from "react-icons/fa6";
 import { FaSearch } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { ImCross } from "react-icons/im";
 import { IoReceipt } from "react-icons/io5";
 import { LuShoppingCart } from "react-icons/lu";
-import { FaChevronDown, FaUser, FaSignOutAlt } from "react-icons/fa";
+import { FaChevronDown, FaSignOutAlt } from "react-icons/fa";
 import axios from "axios";
 import { serverUrl } from "../App";
 import { setUserData } from "../redux/userSlice";
 
+const DIET_OPTIONS = [
+  { id: "all", label: "All", dotClass: "" },
+  { id: "veg", label: "Veg", dotClass: "bg-green-600" },
+  { id: "nonveg", label: "Non-Veg", dotClass: "bg-red-600" },
+];
+
+function DietFilterBar({ dietFilter, onSelectDiet, compact = false }) {
+  return (
+    <div
+      role="group"
+      aria-label="Filter by Veg or Non-Veg"
+      className={`inline-flex items-center bg-white border border-orange-100 rounded-xl p-1 shadow-xs shrink-0 ${
+        compact ? "gap-0.5" : "gap-1"
+      }`}
+    >
+      {DIET_OPTIONS.map((opt) => {
+        const isActive = dietFilter === opt.id;
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => onSelectDiet(opt.id)}
+            aria-pressed={isActive}
+            className={`flex items-center gap-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
+              compact ? "px-2 py-1 text-[11px]" : "px-2.5 py-1.5 text-xs"
+            } ${
+              isActive
+                ? opt.id === "veg"
+                  ? "bg-green-50 text-green-700 border border-green-200 shadow-2xs"
+                  : opt.id === "nonveg"
+                  ? "bg-red-50 text-red-700 border border-red-200 shadow-2xs"
+                  : "bg-[#ff4d2d] text-white shadow-2xs"
+                : "text-gray-600 hover:text-gray-900 hover:bg-orange-50/60"
+            }`}
+          >
+            {opt.dotClass && (
+              <span
+                className={`w-2 h-2 rounded-full shrink-0 ${opt.dotClass}`}
+                aria-hidden="true"
+              />
+            )}
+            <span>{opt.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function Nav() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
 
   const { userData, currentCity, cartItems } = useSelector(
     (state) => state.user
@@ -25,32 +75,46 @@ function Nav() {
 
   const [showInfo, setShowInfo] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [dietFilter, setDietFilter] = useState(searchParams.get("diet") || "all");
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get("search") || "");
+    setDietFilter(searchParams.get("diet") || "all");
+  }, [searchParams]);
 
   const cartCount = (cartItems || []).reduce(
     (total, item) => total + Number(item.quantity || 0),
     0
   );
 
+  // /home par search aur diet filter query params update karta hai
+  const updateUrlFilters = (nextSearch, nextDiet) => {
+    const params = new URLSearchParams();
+    const trimmed = nextSearch.trim();
+    if (trimmed) params.set("search", trimmed);
+    if (nextDiet && nextDiet !== "all") params.set("diet", nextDiet);
+
+    const queryString = params.toString();
+    navigate(queryString ? `/home?${queryString}` : "/home");
+  };
+
+  // Diet filter change handler
+  const handleDietChange = (nextDiet) => {
+    setDietFilter(nextDiet);
+    updateUrlFilters(searchQuery, nextDiet);
+  };
+
   // Search functionality
   const handleSearch = (e) => {
     e.preventDefault();
-
-    const query = searchQuery.trim();
-
-    if (!query) {
-      navigate("/");
-      setShowSearch(false);
-      return;
-    }
-
-    navigate(`/?search=${encodeURIComponent(query)}`);
+    updateUrlFilters(searchQuery, dietFilter);
     setShowSearch(false);
   };
 
   const handleClearSearch = () => {
     setSearchQuery("");
-    navigate("/");
+    updateUrlFilters("", dietFilter);
     setShowSearch(false);
   };
 
@@ -117,68 +181,76 @@ function Nav() {
     <>
       {/* MAIN NAVBAR */}
       <nav className="fixed top-0 left-0 z-9999 w-full bg-[#fff9f6]/95 backdrop-blur-md border-b border-orange-100/80">
-        <div className="max-w-375 mx-auto h-19 px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-4">
+        <div className="max-w-375 mx-auto h-19 px-4 sm:px-6 lg:px-10 flex items-center justify-between gap-3">
 
           {/* LOGO */}
           <h1
-            onClick={() => navigate("/")}
-            className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#ff4d2d] cursor-pointer select-none"
+            onClick={() => navigate("/home")}
+            className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#ff4d2d] cursor-pointer select-none shrink-0"
           >
             Vingo
           </h1>
 
-          {/* DESKTOP LOCATION + SEARCH */}
+          {/* DESKTOP LOCATION + SEARCH + VEG/NON-VEG FILTER */}
           {userData?.role === "user" && (
-            <form
-              onSubmit={handleSearch}
-              className="hidden md:flex items-center w-[42%] lg:w-[44%] max-w-142.5 h-12 bg-white border border-orange-100 rounded-2xl shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300 px-3"
-            >
-              {/* LOCATION */}
-              <div className="flex items-center gap-2 min-w-0 max-w-[38%] pr-3">
-                <FaLocationDot
-                  size={17}
-                  className="text-[#ff4d2d] shrink-0"
-                />
+            <div className="hidden md:flex items-center gap-2.5 flex-1 max-w-2xl">
+              <form
+                onSubmit={handleSearch}
+                className="flex items-center flex-1 min-w-0 h-12 bg-white border border-orange-100 rounded-2xl shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300 px-3"
+              >
+                {/* LOCATION */}
+                <div className="flex items-center gap-2 min-w-0 max-w-[34%] pr-3 border-r border-orange-100">
+                  <FaLocationDot
+                    size={16}
+                    className="text-[#ff4d2d] shrink-0"
+                  />
 
-                <span className="text-sm font-semibold text-gray-700 truncate">
-                  {currentCity || "New Delhi"}
-                </span>
-              </div>
+                  <span className="text-sm font-semibold text-gray-700 truncate">
+                    {currentCity || "New Delhi"}
+                  </span>
+                </div>
 
-              {/* SEARCH */}
-              <div className="flex items-center gap-3 flex-1 min-w-0 pl-3">
-                <button
-                  type="submit"
-                  aria-label="Search food"
-                  className="text-[#ff4d2d] hover:scale-110 transition-transform shrink-0"
-                >
-                  <FaSearch size={17} />
-                </button>
-
-                <input
-                  type="text"
-                  placeholder="Search delicious food..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full min-w-0 bg-transparent outline-none text-sm text-gray-700 placeholder:text-gray-400"
-                />
-
-                {searchQuery && (
+                {/* SEARCH */}
+                <div className="flex items-center gap-3 flex-1 min-w-0 pl-3">
                   <button
-                    type="button"
-                    onClick={handleClearSearch}
-                    aria-label="Clear search"
-                    className="text-gray-400 hover:text-[#ff4d2d] shrink-0"
+                    type="submit"
+                    aria-label="Search food"
+                    className="text-[#ff4d2d] hover:scale-110 transition-transform shrink-0"
                   >
-                    <ImCross size={12} />
+                    <FaSearch size={16} />
                   </button>
-                )}
-              </div>
-            </form>
+
+                  <input
+                    type="text"
+                    placeholder="Search delicious food..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full min-w-0 bg-transparent outline-none text-sm text-gray-700 placeholder:text-gray-400"
+                  />
+
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={handleClearSearch}
+                      aria-label="Clear search"
+                      className="text-gray-400 hover:text-[#ff4d2d] shrink-0"
+                    >
+                      <ImCross size={12} />
+                    </button>
+                  )}
+                </div>
+              </form>
+
+              {/* VEG / NON-VEG FILTER */}
+              <DietFilterBar
+                dietFilter={dietFilter}
+                onSelectDiet={handleDietChange}
+              />
+            </div>
           )}
 
           {/* RIGHT ACTIONS */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
 
             {/* MOBILE SEARCH */}
             {userData?.role === "user" && (
@@ -348,13 +420,13 @@ function Nav() {
           </div>
         </div>
 
-        {/* MOBILE SEARCH PANEL */}
+        {/* MOBILE SEARCH + FILTER PANEL */}
         {showSearch && userData?.role === "user" && (
-          <form
-            onSubmit={handleSearch}
-            className="md:hidden max-w-150 mx-auto px-4 pb-4"
-          >
-            <div className="flex items-center gap-3 w-full h-12 px-3 bg-white border border-orange-100 rounded-xl shadow-sm">
+          <div className="md:hidden max-w-150 mx-auto px-4 pb-4 space-y-2.5">
+            <form
+              onSubmit={handleSearch}
+              className="flex items-center gap-3 w-full h-12 px-3 bg-white border border-orange-100 rounded-xl shadow-sm"
+            >
               <FaLocationDot
                 size={16}
                 className="text-[#ff4d2d] shrink-0"
@@ -388,8 +460,19 @@ function Nav() {
               >
                 <ImCross size={13} />
               </button>
+            </form>
+
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-gray-500">
+                Dietary preference:
+              </span>
+              <DietFilterBar
+                dietFilter={dietFilter}
+                onSelectDiet={handleDietChange}
+                compact
+              />
             </div>
-          </form>
+          </div>
         )}
       </nav>
     </>

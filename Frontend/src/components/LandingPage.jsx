@@ -622,12 +622,7 @@ function LandingPage() {
                 Start ordering <FaArrowRight />
               </Link>
 
-              <Link
-                to="/signin"
-                className="px-8 py-4 rounded-full font-bold text-white border-2 border-white/40 hover:bg-white/10 transition-colors"
-              >
-                I already have an account
-              </Link>
+      
             </div>
           </div>
 
@@ -718,6 +713,7 @@ function LandingPage() {
 
               <div className="flex flex-col gap-4 text-white/60 text-sm">
                 <p>India</p>
+                <p>+91(8787021382)</p>
                 <p>support@vingo.com</p>
               </div>
             </div>
