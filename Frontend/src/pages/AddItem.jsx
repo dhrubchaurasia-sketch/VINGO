@@ -5,6 +5,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaUtensils } from "react-icons/fa";
 import axios from "axios";
 import { setMyShopData } from "../redux/ownerSlice";
+import { serverUrl } from "../App";
 
 function AddItem() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ function AddItem() {
   const [price, setPrice] = useState("0");
   const [frontendImage, setFrontendImage] = useState(null);
   const [backendImage, setBackendImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const categories = [
     "Snacks",
     "Main Course",
@@ -30,9 +33,7 @@ function AddItem() {
     "Others",
   ];
   const [selectedCategory, setSelectedCategory] = useState("");
-  const foodTypes = ["veg", "non veg"];
   const [selectedFoodType, setSelectedFoodType] = useState("veg");
-  const serverUrl = "https://vingo-backend-ghyw.onrender.com";
 
   const handleImage = (e) => {
     const file = e.target.files[0];
@@ -47,6 +48,7 @@ function AddItem() {
     e.preventDefault();
 
     try {
+      setLoading(true);
       const formData = new FormData();
 
       formData.append("name", name);
@@ -69,10 +71,13 @@ function AddItem() {
 
       console.log("SHOP RESPONSE:", result.data);
 
-      navigate("/");
+      // ✅ Landing page ("/") ki jagah Owner Dashboard ("/home") par jayega
+      navigate("/home");
     } catch (error) {
-      console.error("CREATE SHOP ERROR:", error);
-      console.error("RESPONSE:", error.response?.data);
+      console.error("ADD FOOD ITEM ERROR:", error);
+      alert(error.response?.data?.message || "Failed to add food item");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,8 +117,10 @@ function AddItem() {
               placeholder="Enter the food item name"
               onChange={(e) => setName(e.target.value)}
               value={name}
+              required
             />
           </div>
+
           <div>
             <label
               className="block text-gray-700 font-semibold mb-2"
@@ -128,20 +135,21 @@ function AddItem() {
               placeholder="Enter the price"
               onChange={(e) => setPrice(e.target.value)}
               value={price}
+              required
             />
           </div>
 
-
-           <div>
+          <div>
             <label
               className="block text-gray-700 font-semibold mb-2"
-              htmlFor="category" >
-             Select Food Type
+              htmlFor="foodType"
+            >
+              Select Food Type
             </label>
-            
+
             <select
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#ff4d2d]"
-              id="category"
+              id="foodType"
               onChange={(e) => setSelectedFoodType(e.target.value)}
               value={selectedFoodType}
             >
@@ -162,6 +170,7 @@ function AddItem() {
               id="category"
               onChange={(e) => setSelectedCategory(e.target.value)}
               value={selectedCategory}
+              required
             >
               <option value="">Select a category</option>
               {categories.map((category) => (
@@ -171,7 +180,7 @@ function AddItem() {
               ))}
             </select>
           </div>
-         
+
           <div>
             <label
               className="block text-gray-700 font-semibold mb-2"
@@ -201,9 +210,10 @@ function AddItem() {
 
           <button
             type="submit"
-            className="w-full bg-[#ff4d2d] text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-orange-600 transition-all duration-200 cursor-pointer"
+            disabled={loading}
+            className="w-full bg-[#ff4d2d] text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-orange-600 transition-all duration-200 cursor-pointer disabled:opacity-60"
           >
-            Save
+            {loading ? "Saving..." : "Save"}
           </button>
         </form>
       </div>
