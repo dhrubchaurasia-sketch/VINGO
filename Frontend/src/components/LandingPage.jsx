@@ -233,9 +233,9 @@ function LandingPage() {
 
         <div className="relative flex justify-center items-center">
 
-          <div className="absolute w-[300px] h-[300px] sm:w-[430px] sm:h-[430px] bg-orange-200 rounded-full blur-2xl opacity-60"></div>
+          <div className="absolute w-75 h-75 sm:w-107.5 sm:h-107.5 bg-orange-200 rounded-full blur-2xl opacity-60"></div>
 
-          <div className="relative w-full max-w-[530px] aspect-square rounded-[40px] overflow-hidden">
+          <div className="relative w-full max-w-132.5 aspect-square rounded-[40px] overflow-hidden">
             <img
               src="https://images.unsplash.com/photo-1547592180-85f173990554?w=1000"
               alt="Delicious food"
