@@ -2,6 +2,7 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useSelector } from "react-redux";
+import LandingPage from "./components/LandingPage";
 
 import useLocomotive from "./hooks/useLocomotive";
 import useGetCurrentUser from "./hooks/useGetCurrentUser";
@@ -73,6 +74,7 @@ function App() {
       <Route path="/my-orders" element={<MyOrders />} />
       <Route path="/owner-orders" element={<OwnerOrders />} />
       <Route path="/delivery-boy" element={<DeliveryBoy />} />
+      <Route path="/" element={<LandingPage />} />
     </Routes>
   );
 }

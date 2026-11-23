@@ -23,6 +23,7 @@ const port = process.env.PORT || 5000;
 // HTTP server
 const server = http.createServer(app);
 const allowedOrigins = [
+  "http://localhost:5174",
   "http://localhost:5173",
   "https://vingo-frontend-lydl.onrender.com",
 ];
