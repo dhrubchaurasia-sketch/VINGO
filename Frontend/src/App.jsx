@@ -2,6 +2,7 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useSelector } from "react-redux";
+
 import LandingPage from "./components/LandingPage";
 
 import useLocomotive from "./hooks/useLocomotive";
@@ -61,20 +62,60 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/signup" element={!userData ? <SignUp /> : <Navigate to="/" />} />
-      <Route path="/signin" element={!userData ? <SignIn /> : <Navigate to="/" />} />
-      <Route path="/forgot-password" element={!userData ? <ForgotPassword /> : <Navigate to="/" />} />
-      <Route path="/" element={!userData ? <Navigate to="/signup" replace /> : <Home />} />
+      {/* Landing Page */}
+      <Route path="/" element={<LandingPage />} />
+
+      {/* Authentication Routes */}
+      <Route
+        path="/signup"
+        element={
+          !userData ? <SignUp /> : <Navigate to="/home" replace />
+        }
+      />
+
+      <Route
+        path="/signin"
+        element={
+          !userData ? <SignIn /> : <Navigate to="/home" replace />
+        }
+      />
+
+      <Route
+        path="/forgot-password"
+        element={
+          !userData ? (
+            <ForgotPassword />
+          ) : (
+            <Navigate to="/home" replace />
+          )
+        }
+      />
+
+      {/* Dashboard */}
+      <Route
+        path="/home"
+        element={
+          userData ? <Home /> : <Navigate to="/signin" replace />
+        }
+      />
+
+      {/* Shop Routes */}
       <Route path="/create-edit-shop" element={<CreateEditShop />} />
       <Route path="/add-food-items" element={<AddItem />} />
-      <Route path="/cart" element={<CartPage />} />
       <Route path="/edit-food-item/:id" element={<EditItem />} />
+
+      {/* Order Routes */}
+      <Route path="/cart" element={<CartPage />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/order-placed" element={<OrderPlaced />} />
       <Route path="/my-orders" element={<MyOrders />} />
       <Route path="/owner-orders" element={<OwnerOrders />} />
+
+      {/* Delivery Route */}
       <Route path="/delivery-boy" element={<DeliveryBoy />} />
-      <Route path="/" element={<LandingPage />} />
+
+      {/* Unknown Routes */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
